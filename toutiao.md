@@ -52,6 +52,20 @@ if (url.indexOf("pstatp.com")==-1 || ! Laya.Browser.window.tt) {
 }
 ```
 
+# 奇怪的Texture问题
+在某天头条版本更新后，我发现我这边的某个小游戏打不开了，报错信息为`activeResource undefined`。
+最终调试定位，发现是在`Texture`的`__getset(0,__proto,'source`中，`this.bitmap`不是Resource对象，console.log输出是一个canvas。
+由于是p0级错误，因此直接采取了简单粗暴让游戏可以运行的方法。
+将
+```
+this.bitmap.activeResource();
+```
+改成
+```
+this.bitmap.activeResource && this.bitmap.activeResource();
+```
+但具体的canvas出现的地方，还需要进一步研究重现，之后有结论了会进行更新。
+
 # 需要接入录屏功能
 头条的录屏是必须要接入的，不要忘记。
 
