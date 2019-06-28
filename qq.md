@@ -24,3 +24,8 @@ return;
 经观察后发现，取到的用户信息中，avatar的格式是有规律的，其中有一段就是相应的openId。
 一种作法是，通过取相应位置的子串得到openId。
 另一种作法是，将openId排序，获取到的信息按avatar排序，之后一一对应。不过前提是没有传`selfOpenId`。
+
+# banner广告
+虽然可以设置宽高，但是会自行缩放，我这边的情况是以宽度为准，高度缩到约是宽度的1/4。
+banner广告在onResize中重新设置left和top不会生效，所以我这边都是在初始化的时候直接设置。希望之后更新能修复此问题。
+在IOS中，如果banner广告想要靠底，top应该设为（系统的screenHeight - banner高度），不能用windowHeight。
