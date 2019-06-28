@@ -52,7 +52,7 @@ if (url.indexOf("pstatp.com")==-1 || ! Laya.Browser.window.tt) {
 }
 ```
 
-# 奇怪的Texture问题
+# Texture问题
 在某天头条版本更新后，我发现我这边的某个小游戏打不开了，报错信息为`activeResource undefined`。
 最终调试定位，发现是在`Texture`的`__getset(0,__proto,'source`中，`this.bitmap`不是Resource对象，console.log输出是一个canvas。
 由于是p0级错误，因此直接采取了简单粗暴让游戏可以运行的方法。
@@ -64,7 +64,22 @@ this.bitmap.activeResource();
 ```
 this.bitmap.activeResource && this.bitmap.activeResource();
 ```
-但具体的canvas出现的地方，还需要进一步研究重现，之后有结论了会进行更新。
+~~但具体的canvas出现的地方，还需要进一步研究重现，之后有结论了会进行更新。~~
+
+经过研究发现，问题出现的地方是在主域中设定子域canvas大小的时，使用了`new Laya.Texture(Laya.Browser.window.sharedCanvas)`.
+然后在`Texture`的`setTo`方法中，`bitmap instanceof window.HTMLElement`判断失败，直接赋值，导致this.bitmap不是Resource对象。
+
+打印调试发现，`window.sharedCanvas`，也就是头条的`tt.getOpenDataContext().canvas`,是经过处理的。它虽然是`HTMLCanvasElement`，但却不是window定义的`HTMLCanvasElement`，所以判断失败。
+
+因此，除了上面的简单粗暴的方法外，还有另一种简单粗暴的方法。
+在`Texture`的`setTo`方法中，将
+```
+if (/*__JS__ */bitmap instanceof window.HTMLElement)
+```
+改为
+```
+if (/*__JS__ */bitmap instanceof window.HTMLElement || (Laya.Browser.window.tt && bitmap === Laya.Browser.window.tt.getOpenDataContext().canvas))
+```
 
 # 需要接入录屏功能
 头条的录屏是必须要接入的，不要忘记。
