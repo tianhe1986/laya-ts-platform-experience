@@ -93,9 +93,13 @@ var MiniFileMgr$4=(function(){
 		(fileType===void 0)&& (fileType="");
 		(isAutoClear===void 0)&& (isAutoClear=true);
 		MiniFileMgr.fs.readFile({uri:filePath,encoding:encoding,success:function (data){
-				if (filePath.indexOf("http://")!=-1 || filePath.indexOf("https://")!=-1){
+				if (readyUrl.indexOf("http://")!=-1 || readyUrl.indexOf("https://")!=-1){
 					if(VVMiniAdapter.autoCacheFile || isSaveFile){
-						MiniFileMgr.copyFile(filePath,readyUrl,callBack,encoding,isAutoClear);
+						MiniFileMgr.copyFile(filePath,readyUrl,new Handler(MiniFileMgr,() => {
+							if(!data.data)
+								data.data=data.text;
+							callBack !=null && callBack.runWith([0,data]);
+						}),encoding,isAutoClear);
 					}
 				}
 				else{
