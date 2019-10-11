@@ -1,6 +1,32 @@
 # 通用
 这里会讲一些所有平台都有可能碰到的问题。
 
+# 强制使用默认加载
+以微信文件`laya.wxmini.js`为例，在`MiniLoader.load`方法中有这么一段：
+```
+        var urlType=Utils.getFileExtension(url);
+        if ((MiniLoader._fileTypeArr.indexOf(urlType)!=-1)){
+			MiniAdpter.EnvConfig.load.call(this,url,type,cache,group,ignoreCache);
+		}
+```
+
+而`_fileTypeArr=['png','jpg','bmp','jpeg','gif']` 
+
+因此，这一段的意思就是，如果碰到了图片文件，就调用默认的加载方式。
+
+但是，这里有个问题，图片的URL不一定是以这些后缀名为结尾的，例如，QQ头像。
+
+我的做法是，碰到是图片类型的，就强制使用默认加载，改成这样:
+```
+        if (type=='image' ||  (MiniLoader._fileTypeArr.indexOf(urlType)!=-1)){
+			MiniAdpter.EnvConfig.load.call(this,url,type,cache,group,ignoreCache);
+		}
+```
+
+因为我们项目中没有使用二进制流的图片，即url以"data:image"开头，因此就忽略了这个处理，如果发现有问题，请提个issue或pull request给我。
+
+而且，讲道理，sound类型也该强制使用默认加载啊:)
+
 # 本地缓存文件失效
 在某些平台（至今为止，我在头条和vivo碰到过）下，可能由于APP内部（也有可能是手机系统）的清理，造成本地缓存的文件丢失，但是保存缓存对应关系的`layaairfiles.txt`文件没有丢失。
 
