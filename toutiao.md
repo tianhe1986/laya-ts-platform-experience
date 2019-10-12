@@ -1,6 +1,23 @@
 # 头条小游戏
 同样可以直接发布成微信小游戏，头条底层应该也做了相应的适配，但是我接入的时候，坑还比如多，希望之后版本更新，一点点完善起来。
 
+# 子域无法展示问题
+特定的版本，会出现子域无法展示的情况。
+
+子域是使用`Laya.Browser.window.sharedCanvas`作为初始化参数生成`Laya.Texture`对象进行处理的，初始化时会调用`Texture.setTo`方法进行处理。
+
+从适配js文件`weapp-adapter.js`中可以看到，`sharedCanvas`应该作为`window.HTMLElement`的子类，然而，经过调试发现，判断instance of时失败了，导致没有正确的处理。
+
+我的作法是，让其强制进入正确的处理分支，将`Texture.setTo`中这句判断：
+```
+if (/*__JS__ */bitmap instanceof window.HTMLElement)
+```
+
+改为
+```
+if (/*__JS__ */bitmap instanceof window.HTMLElement || (Laya.Browser.window.tt && bitmap === Laya.Browser.window.tt.getOpenDataContext().canvas))
+```
+
 # 使用panel造成的IOS花屏问题
 如果用了panel，而所在的view位于最上层的话，其下层的3d渲染在头条IOS版本中会出现花屏。
 我的处理时用box + rect mask替换。
